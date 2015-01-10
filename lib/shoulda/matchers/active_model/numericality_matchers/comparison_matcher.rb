@@ -75,11 +75,21 @@ module Shoulda
 
           def all_bounds_correct?
             @comparison_combos.all? do |diff, checker_type|
-              __send__(checker_type, @value + diff) do |matcher|
-                matcher.with_message(@message, values: { count: @value })
-              end
+              __send__(checker_type, @value + diff)
             end
           end
+
+          def allows_value_of(value)
+            super(value) do |matcher|
+              matcher.with_message(@message, values: { count: @value })
+            end
+          end
+
+          # def disallows_value_of(value)
+            # super(value) do |matcher|
+              # matcher.with_message(@message, values: { count: @value })
+            # end
+          # end
         end
       end
     end

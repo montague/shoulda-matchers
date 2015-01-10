@@ -227,4 +227,44 @@ describe Shoulda::Matchers::ActiveModel::AllowValueMatcher, type: :model do
       end
     end
   end
+
+  context 'when the value is outside of the range of the column' do
+    context 'not qualified with strict' do
+      it 'rejects' do
+        attribute_options = { type: :integer, options: { limit: 2 } }
+        record = define_model(:example, attr: attribute_options).new
+        expect(record).not_to allow_value(100000).for(:attr)
+      end
+
+      it 'does not accept, failing with the correct message' do
+        attribute_options = { type: :integer, options: { limit: 2 } }
+        record = define_model(:example, attr: attribute_options).new
+        assertion = -> { expect(record).to allow_value(100000).for(:attr) }
+        message = <<-MESSAGE.strip_heredoc.strip
+          Did not expect validation to fail when attr is set to 100000,
+          got: "RangeError: 100000 is out of range for ActiveRecord::Type::Integer with limit 2"
+        MESSAGE
+        expect(&assertion).to fail_with_message(message)
+      end
+    end
+
+    context 'qualified with strict' do
+      it 'rejects' do
+        attribute_options = { type: :integer, options: { limit: 2 } }
+        record = define_model(:example, attr: attribute_options).new
+        expect(record).not_to allow_value(100000).for(:attr).strict
+      end
+
+      it 'does not accept, failing with the correct message' do
+        attribute_options = { type: :integer, options: { limit: 2 } }
+        record = define_model(:example, attr: attribute_options).new
+        assertion = -> { expect(record).to allow_value(100000).for(:attr).strict }
+        message = <<-MESSAGE.strip_heredoc.strip
+          Did not expect validation to fail when attr is set to 100000,
+          got: "RangeError: 100000 is out of range for ActiveRecord::Type::Integer with limit 2"
+        MESSAGE
+        expect(&assertion).to fail_with_message(message)
+      end
+    end
+  end
 end

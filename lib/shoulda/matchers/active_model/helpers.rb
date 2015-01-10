@@ -35,21 +35,11 @@ module Shoulda
         #   default_error_message(:too_long, count: 60)
         #   default_error_message(:blank, model_name: 'user', attribute: 'name')
         #   default_error_message(:blank, instance: #<Model>, attribute: 'name')
-        def default_error_message(key, options = {})
+        def default_error_message(type, options = {})
           model_name = options.delete(:model_name)
           attribute = options.delete(:attribute)
           instance = options.delete(:instance)
-
-          if instance && instance.errors.respond_to?(:generate_message)
-            instance.errors.generate_message(attribute.to_sym, key, options)
-          else
-            default_translation = [ :"activerecord.errors.models.#{model_name}.#{key}",
-                                    :"activerecord.errors.messages.#{key}",
-                                    :"errors.attributes.#{attribute}.#{key}",
-                                    :"errors.messages.#{key}" ]
-            I18n.translate(:"activerecord.errors.models.#{model_name}.attributes.#{attribute}.#{key}",
-              { default: default_translation }.merge(options))
-          end
+          RailsShim.generate_validation_message(instance, attribute.to_sym, type, model_name, options)
         end
       end
     end
