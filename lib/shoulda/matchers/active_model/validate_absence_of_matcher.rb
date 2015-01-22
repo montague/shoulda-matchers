@@ -94,9 +94,14 @@ module Shoulda
         end
 
         def attribute_class
-          @subject.class.respond_to?(:columns_hash) &&
-            @subject.class.columns_hash[@attribute.to_s].respond_to?(:klass) &&
-            @subject.class.columns_hash[@attribute.to_s].klass
+          @attr_class ||= if @subject.class.respond_to?(:column_defaults)
+                            # ActiveRecord 4.2
+                            @subject.class.column_defaults[@attribute.to_s].class
+                          else
+                            @subject.class.respond_to?(:columns_hash) &&
+                              @subject.class.columns_hash[@attribute.to_s].respond_to?(:klass) &&
+                              @subject.class.columns_hash[@attribute.to_s].klass
+                          end
         end
 
         def collection?
